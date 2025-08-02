@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:linkshortener;DB_CLOSE_DELAY=-1;
+    username: sa
+    password: sa
+    driverClassName: org.h2.Driver
+    hikari:
+      minimumIdle: 1
+      maximum-pool-size: 5
+      maxLifetime: 300000
+      idle-timeout: 10000
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: true
+        jdbc:
+          time_zone: UTC
+          batch_size: 15
+        order_inserts: true
+        order_updates: true
+        connection:
+          provider_disables_autocommit: true
+        query:
+          fail_on_pagination_over_collection_fetch: true
+  h2:
+    console:
+      enabled: false
+
+app:
+  base-url: http://localhost:8080
