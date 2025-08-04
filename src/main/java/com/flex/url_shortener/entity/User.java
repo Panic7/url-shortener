@@ -39,7 +39,8 @@ import java.util.Set;
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_email", columnList = "email")
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_refreshtoken", columnList = "refresh_token_id")
 }, uniqueConstraints = {
         @UniqueConstraint(name = "uc_user_email", columnNames = {"email"})
 })
