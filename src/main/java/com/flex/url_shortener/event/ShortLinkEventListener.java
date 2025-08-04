@@ -1,6 +1,6 @@
 package com.flex.url_shortener.event;
 
-import com.flex.url_shortener.service.ShortLinkMetricService;
+import com.flex.url_shortener.service.shortlink.ShortLinkMetricService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

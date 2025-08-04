@@ -1,6 +1,8 @@
 package com.flex.url_shortener.repository;
 
 import com.flex.url_shortener.entity.ShortLink;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +21,6 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
     @Query(value = "SELECT nextval('short_link_seq')", nativeQuery = true)
     Long getNextSequenceValue();
+
+    Page<ShortLink> findAllByUserEmail(String email, Pageable pageable);
 }
