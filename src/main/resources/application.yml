@@ -35,3 +35,11 @@ spring:
 
 app:
   base-url: http://localhost:8080
+
+security:
+  jwt:
+    access-validity: 120000
+    refresh-validity: 86400000 # 24 hours (in ms)
+    access-cookie-name: 792F423F4528482B
+    refresh-cookie-name: 566B597033733676
+    secret: 2F423F4528482B4D6251655468566D597133743677397A24432646294A404E6
