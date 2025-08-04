@@ -9,9 +9,9 @@ import static com.flex.url_shortener.common.ApplicationConstants.SecurityPaths.T
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.flex.url_shortener.entity.Role;
-import com.flex.url_shortener.security.jwt.JwtAuthFilter;
 import com.flex.url_shortener.security.jwt.JwtAccessDeniedHandler;
 import com.flex.url_shortener.security.jwt.JwtAuthEntryPoint;
+import com.flex.url_shortener.security.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
