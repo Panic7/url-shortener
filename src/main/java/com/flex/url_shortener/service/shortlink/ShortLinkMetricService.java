@@ -1,4 +1,4 @@
-package com.flex.url_shortener.service;
+package com.flex.url_shortener.service.shortlink;
 
 import com.flex.url_shortener.repository.ShortLinkRepository;
 import lombok.RequiredArgsConstructor;

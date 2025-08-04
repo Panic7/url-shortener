@@ -1,4 +1,4 @@
-package com.flex.url_shortener.service;
+package com.flex.url_shortener.service.shortlink;
 
 import com.flex.url_shortener.dto.PageResponse;
 import com.flex.url_shortener.dto.ShortLinkRequest;
@@ -8,8 +8,8 @@ import com.flex.url_shortener.entity.ShortLink;
 import com.flex.url_shortener.event.OriginalLinkAccessed;
 import com.flex.url_shortener.mapper.ShortLinkMapper;
 import com.flex.url_shortener.repository.ShortLinkRepository;
-import com.flex.url_shortener.service.shortlink.ShortCodeGenerator;
-import com.flex.url_shortener.service.shortlink.ShortUrlBuilder;
+import com.flex.url_shortener.service.AuthService;
+import com.flex.url_shortener.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

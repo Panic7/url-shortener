@@ -1,4 +1,4 @@
-package com.flex.url_shortener.service;
+package com.flex.url_shortener.service.shortlink;
 
 import com.flex.url_shortener.common.Base58Encoder;
 import org.springframework.stereotype.Service;

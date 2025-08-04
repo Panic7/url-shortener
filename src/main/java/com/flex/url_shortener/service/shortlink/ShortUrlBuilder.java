@@ -1,4 +1,4 @@
-package com.flex.url_shortener.service;
+package com.flex.url_shortener.service.shortlink;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

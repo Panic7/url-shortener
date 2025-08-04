@@ -4,7 +4,7 @@ import com.flex.url_shortener.dto.PageResponse;
 import com.flex.url_shortener.dto.ShortLinkRequest;
 import com.flex.url_shortener.dto.ShortLinkResponse;
 import com.flex.url_shortener.dto.ShortUrlDto;
-import com.flex.url_shortener.service.ShortLinkService;
+import com.flex.url_shortener.service.shortlink.ShortLinkService;
 import com.flex.url_shortener.validation.MaxPageSize;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
