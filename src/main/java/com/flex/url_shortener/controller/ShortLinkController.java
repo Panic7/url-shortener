@@ -42,7 +42,7 @@ public class ShortLinkController {
                 .build();
     }
 
-    @GetMapping("/short-links/users/me")
+    @GetMapping("/short-links")
     public ResponseEntity<PageResponse<ShortLinkResponse>> getMyShortLinks(@NotNull @MaxPageSize(maxPerPage = 30) Pageable pageable) {
         var userShortLinks = shortLinkService.getMyShortLinks(pageable);
         return ResponseEntity.ok(userShortLinks);

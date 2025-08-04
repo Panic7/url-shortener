@@ -19,7 +19,7 @@ public class ApplicationConstants {
         public static final String LOGIN = "/auth/login";
         public static final String SIGN_UP = "/users/signup";
         public static final String H2_CONSOLE = "/h2-console";
-        public static final String MY_SHORT_LINKS = "/short-links/users/me";
+        public static final String MY_SHORT_LINKS = "/short-links";
     }
 
     @UtilityClass
