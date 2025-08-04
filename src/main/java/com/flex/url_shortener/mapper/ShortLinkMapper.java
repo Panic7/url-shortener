@@ -17,8 +17,6 @@ public abstract class ShortLinkMapper {
     @Autowired
     private ShortUrlBuilder shortUrlBuilder;
 
-    public abstract ShortLinkResponse toResponse(String shortenedUrl);
-
     @Mapping(target = "shortUrl", source = "shortCode", qualifiedByName = "shortCodeToShortUrl")
     public abstract ShortLinkResponse toResponse(ShortLink shortLink);
 

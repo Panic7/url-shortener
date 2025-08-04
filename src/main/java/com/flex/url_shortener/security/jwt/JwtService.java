@@ -82,6 +82,7 @@ public class JwtService {
 
     public boolean validateAccessToken(String token, String email) {
         var decodedJWT = JWT.require(signAlgorithm.getSignAlgorithm())
+                .withSubject(email)
                 .withClaimPresence(CLAIM_NAME_ROLE)
                 .build()
                 .verify(token);

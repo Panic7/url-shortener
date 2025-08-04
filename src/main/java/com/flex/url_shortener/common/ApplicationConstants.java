@@ -28,7 +28,7 @@ public class ApplicationConstants {
         public static final int MAX_SIZE_EMAIL = 30;
         public static final int MIN_SIZE_PASSWORD = 4;
         public static final int MAX_SIZE_PASSWORD = 16;
-        public static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        public static final String EMAIL_REGEX = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
         public static final String SHORT_CODE_REGEX = "^[1-9A-HJ-NP-Za-km-z]{6}$";
         public static final int DEFAULT_MAX_PAGE_SIZE = 20;
     }
