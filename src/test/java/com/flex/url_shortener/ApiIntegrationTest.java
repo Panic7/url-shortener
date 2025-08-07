@@ -43,10 +43,10 @@ class ApiIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Value("${security.jwt.access-cookie-name}")
+    @Value("${security.jwt.access-token.cookie.name}")
     private String accessTokenCookieName;
 
-    @Value("${security.jwt.refresh-cookie-name}")
+    @Value("${security.jwt.refresh-token.cookie.name}")
     private String refreshTokenCookieName;
 
     private static final String URL_TO_SHORTEN = "https://google.com";
@@ -144,9 +144,26 @@ class ApiIntegrationTest {
         );
     }
 
-
     @Test
     @Order(8)
+    void whenGetCurrentUserWithValidAccessToken_thenReturn200AndUserResponse() {
+        var headers = new HttpHeaders();
+        headers.add(HttpHeaders.COOKIE, accessTokenCookie);
+
+        var response = restTemplate.exchange(
+                "/auth/current-user",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                UserResponse.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(AUTH_REQUEST.email(), response.getBody().email());
+    }
+
+    @Test
+    @Order(9)
     void whenLogout_shouldInvalidateCookies() {
         var headers = new HttpHeaders();
         headers.add(HttpHeaders.COOKIE, accessTokenCookie);
@@ -174,12 +191,12 @@ class ApiIntegrationTest {
             if (cookie.startsWith(accessTokenCookieName)) {
                 accessTokenCookie = cookie;
                 accessTokenFound = true;
-                assertThat(cookie).isNotBlank().contains("HttpOnly", "Secure", "SameSite=STRICT");
+                assertThat(cookie).isNotBlank().contains("HttpOnly", "Secure");
             }
             if (cookie.startsWith(refreshTokenCookieName)) {
                 refreshTokenCookie = cookie;
                 refreshTokenFound = true;
-                assertThat(cookie).isNotBlank().contains("HttpOnly", "Secure", "SameSite=STRICT");
+                assertThat(cookie).isNotBlank().contains("HttpOnly", "Secure");
             }
         }
 

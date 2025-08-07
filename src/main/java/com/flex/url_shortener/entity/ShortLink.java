@@ -50,7 +50,7 @@ public class ShortLink {
     )
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String originalUrl;
 
     @Column(nullable = false, unique = true)
