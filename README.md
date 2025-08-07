@@ -10,6 +10,7 @@
     - [Login](#1-login)
     - [Refresh Token](#2-refresh-token)
     - [Logout](#3-logout)
+    - [Current User](#4-current-user)
   - [ShortLinkController](#shortlinkcontroller)
     - [Create Short Link](#1-create-short-link)
     - [Get Short Links with Metrics](#2-get-short-links-with-metrics)
@@ -113,6 +114,15 @@ In the root of the project, you will find the `link-shortener.har` file. This fi
 #### 3. Logout
 - **Endpoint:** `POST /auth/logout`
 - **Output:** HTTP 200 OK with Set-Cookie headers to clear `accessToken` and `refreshToken`.
+
+#### 4. Current User
+- **Endpoint:** `GET /auth/current-user`
+- **Output:** HTTP 200 OK
+    ```json
+    {
+      "email": "user@example.com";
+    }
+    ```
 
 ### ShortLinkController
 
