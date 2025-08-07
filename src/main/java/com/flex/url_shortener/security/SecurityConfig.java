@@ -1,5 +1,6 @@
 package com.flex.url_shortener.security;
 
+import static com.flex.url_shortener.common.ApplicationConstants.SecurityPaths.CURRENT_USER;
 import static com.flex.url_shortener.common.ApplicationConstants.SecurityPaths.H2_CONSOLE;
 import static com.flex.url_shortener.common.ApplicationConstants.SecurityPaths.LOGIN;
 import static com.flex.url_shortener.common.ApplicationConstants.SecurityPaths.LOGOUT;
@@ -12,7 +13,9 @@ import com.flex.url_shortener.entity.Role;
 import com.flex.url_shortener.security.jwt.JwtAccessDeniedHandler;
 import com.flex.url_shortener.security.jwt.JwtAuthEntryPoint;
 import com.flex.url_shortener.security.jwt.JwtAuthFilter;
+import com.flex.url_shortener.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,6 +33,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,21 +44,35 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
+
+    @Value("${security.jwt.access-token.cookie.name}")
+    private String accessTokenCookieName;
+
+    @Value("${security.jwt.refresh-token.cookie.name}")
+    private String refreshTokenCookieName;
+
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(
                         HeadersConfigurer.FrameOptionsConfig::sameOrigin)) // Allow H2 console to be accessed
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers(LOGIN, SIGN_UP, LOGOUT, TOKEN_REFRESH, "/*", H2_CONSOLE + "/**").permitAll()
+                        .requestMatchers(LOGIN, SIGN_UP, LOGOUT, TOKEN_REFRESH, CURRENT_USER, "/*", H2_CONSOLE + "/**")
+                        .permitAll()
                         .requestMatchers(MY_SHORT_LINKS).hasAuthority(Role.USER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(jwtService, userDetailsService, handlerExceptionResolver),
+                        UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .deleteCookies(accessTokenCookieName, refreshTokenCookieName))
                 .build();
     }
 
@@ -71,7 +90,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Cache-Control", "Content-Type"));
 

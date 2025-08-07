@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         var user = userRepository.findOne(example);
 
         if (user.isEmpty()) {
-            throw new RuntimeException("User with email '%s' was not found.".formatted(email));
+            throw new UsernameNotFoundException("User with email '%s' does not exist.".formatted(email));
         }
 
         return new UserDetailsImpl(user.get());

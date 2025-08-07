@@ -5,6 +5,7 @@ import com.flex.url_shortener.repository.UserRepository;
 import com.flex.url_shortener.security.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,8 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken rotate(String userEmail) {
-        var user = userRepository.findByEmailWithRefreshToken(userEmail).orElseThrow();
+        var user = userRepository.findByEmailWithRefreshToken(userEmail).orElseThrow(() ->
+                new UsernameNotFoundException("User with email '%s' does not exist.".formatted(userEmail)));
         var token = jwtService.createRefreshToken(userEmail);
         var tokenExpiration = jwtService.extractExpiresAt(token);
 

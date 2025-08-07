@@ -1,7 +1,7 @@
 package com.flex.url_shortener.security.jwt;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.flex.url_shortener.entity.Role;
 import com.flex.url_shortener.service.CookieService;
@@ -21,13 +21,13 @@ import java.util.Set;
 public class JwtService {
     private static final String CLAIM_NAME_ROLE = "role";
 
-    @Value("${security.jwt.access-validity}")
+    @Value("${security.jwt.access-token.validity}")
     private Long accessTokenValidityInMs;
 
-    @Value("${security.jwt.refresh-validity}")
+    @Value("${security.jwt.refresh-token.validity}")
     private Long refreshTokenValidityInMs;
 
-    @Value("${security.jwt.access-cookie-name}")
+    @Value("${security.jwt.access-token.cookie.name}")
     private String accessTokenCookieName;
 
     private final JwtSignProvider signAlgorithm;
@@ -38,11 +38,11 @@ public class JwtService {
     }
 
     public String extractSubject(String token) {
-        return extractDecodedJWT(token).getSubject();
+        return decodeJWT(token).getSubject();
     }
 
     public Instant extractExpiresAt(String token) {
-        return extractDecodedJWT(token).getExpiresAtAsInstant();
+        return decodeJWT(token).getExpiresAtAsInstant();
     }
 
     public String createAccessToken(String email, Set<Role> roles) {
@@ -68,47 +68,30 @@ public class JwtService {
                 .sign(signAlgorithm.getSignAlgorithm());
     }
 
-    public boolean validateRefreshToken(String token, String subject) {
-        var decodedJWT = JWT.require(signAlgorithm.getSignAlgorithm())
-                .withSubject(subject)
+    public void validateRefreshToken(String token) {
+        JWT.require(signAlgorithm.getSignAlgorithm())
                 .build()
                 .verify(token);
-
-        var tokenValidityInMs = decodedJWT.getExpiresAtAsInstant().toEpochMilli() -
-                decodedJWT.getIssuedAtAsInstant().toEpochMilli();
-
-        return tokenValidityInMs == refreshTokenValidityInMs;
     }
 
-    public boolean validateAccessToken(String token, String email) {
-        var decodedJWT = JWT.require(signAlgorithm.getSignAlgorithm())
+    public void validateAccessToken(String token, String email) {
+        JWT.require(signAlgorithm.getSignAlgorithm())
                 .withSubject(email)
                 .withClaimPresence(CLAIM_NAME_ROLE)
                 .build()
                 .verify(token);
-
-        var tokenValidityInMs = decodedJWT.getExpiresAtAsInstant().toEpochMilli() -
-                decodedJWT.getIssuedAtAsInstant().toEpochMilli();
-
-        return tokenValidityInMs == accessTokenValidityInMs;
     }
 
     /**
-     * Create DecodedJWT object from token.
-     * If the token is valid, it returns a DecodedJWT object
-     * that can be used to extract certain fields from the token
-     * otherwise it throws a JWTVerificationException.
+     * Decode JWT token without validation.
      *
-     * @param token the JWT token we will create DecodedJWT from
+     * @param token the JWT token to decode
      * @return DecodedJWT object
-     * @see JWTVerificationException
+     * @throws JWTDecodeException if any part of the token contained an invalid jwt or JSON format of each of the jwt parts
      * @see DecodedJWT
      */
-    private DecodedJWT extractDecodedJWT(String token) {
-
-        return JWT.require(signAlgorithm.getSignAlgorithm())
-                .build()
-                .verify(token);
+    private DecodedJWT decodeJWT(String token) {
+        return JWT.decode(token);
     }
 
 

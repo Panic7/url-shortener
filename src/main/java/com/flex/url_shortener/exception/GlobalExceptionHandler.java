@@ -1,9 +1,14 @@
 package com.flex.url_shortener.exception;
 
+import static com.flex.url_shortener.common.ApplicationConstants.ExceptionMessage.BAD_CREDENTIALS;
+import static com.flex.url_shortener.common.ApplicationConstants.ExceptionMessage.JWT_EXPIRED;
+import static com.flex.url_shortener.common.ApplicationConstants.ExceptionMessage.JWT_VERIFICATION_FAILED;
 import static com.flex.url_shortener.common.ApplicationConstants.ExceptionMessage.UNAUTHENTICATED;
 import static com.flex.url_shortener.common.ApplicationConstants.ExceptionMessage.UNAUTHORIZED;
+import static org.springframework.http.HttpHeaders.WWW_AUTHENTICATE;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +16,11 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,7 +30,6 @@ import java.nio.file.AccessDeniedException;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -40,7 +48,59 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({AuthenticationException.class, JWTVerificationException.class, AuthenticationCookieMissing.class})
+    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
+    public ResponseEntity<ExceptionMessage> handleAuthenticationException(
+            HttpServletRequest request,
+            AuthenticationException exception) {
+        log.error("Exception was thrown due authentication failure:", exception);
+
+        final var message = ExceptionMessage.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .date(new Date())
+                .description(BAD_CREDENTIALS)
+                .url(request.getRequestURL().toString())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ExceptionMessage> handleJWTExpiredException(
+            HttpServletRequest request,
+            TokenExpiredException exception) {
+        log.error("Exception was thrown due JWT expiration:", exception);
+
+        var message = ExceptionMessage.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .date(new Date())
+                .description(JWT_EXPIRED)
+                .url(request.getRequestURL().toString())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(WWW_AUTHENTICATE, "Bearer error=token_expired")
+                .body(message);
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<ExceptionMessage> handleJWTVerificationException(
+            HttpServletRequest request,
+            JWTVerificationException exception) {
+        log.error("Exception was thrown due JWT verification failure:", exception);
+
+        var message = ExceptionMessage.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .date(new Date())
+                .description(JWT_VERIFICATION_FAILED)
+                .url(request.getRequestURL().toString())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(WWW_AUTHENTICATE, "Bearer error=token_invalid")
+                .body(message);
+    }
+
+    @ExceptionHandler({AuthenticationException.class, AuthenticationCookieMissing.class})
     public ResponseEntity<ExceptionMessage> handleAuthenticationException(
             HttpServletRequest request,
             RuntimeException exception) {
@@ -103,12 +163,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionMessage> handleValidationErrors(final HttpServletRequest request,
                                                                    final MethodArgumentNotValidException ex) {
         log.error("Validation on an argument fails:", ex);
-        String errors = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .map(a -> "Value '%s' violated constraint: %s".formatted(a.getRejectedValue(), a.getDefaultMessage()))
-                .collect(Collectors.joining(", "));
+
+        var exceptionDescription = new StringBuilder();
+
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            var defaultMessage = "%s: %s".formatted(error.getField(), error.getDefaultMessage());
+            exceptionDescription.append(defaultMessage);
+        }
+
+        for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
+            var defaultMessage = "%s: %s".formatted(error.getObjectName(), error.getDefaultMessage());
+            exceptionDescription.append(defaultMessage);
+        }
         var errorMessage = new ExceptionMessage(
-                HttpStatus.BAD_REQUEST.value(), new Date(), errors, request.getRequestURI());
+                HttpStatus.BAD_REQUEST.value(), new Date(), exceptionDescription.toString(), request.getRequestURI());
 
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }

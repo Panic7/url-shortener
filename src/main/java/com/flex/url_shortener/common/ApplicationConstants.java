@@ -7,7 +7,7 @@ public class ApplicationConstants {
 
     @UtilityClass
     public class CookiePaths {
-        public static final String REFRESH_TOKEN = "/auth/refresh";
+        public static final String REFRESH_TOKEN = "/";
         public static final String ACCESS_TOKEN = "/";
     }
 
@@ -17,6 +17,7 @@ public class ApplicationConstants {
         public static final String TOKEN_REFRESH = "/auth/refresh";
         public static final String LOGOUT = "/auth/logout";
         public static final String LOGIN = "/auth/login";
+        public static final String CURRENT_USER = "/auth/current-user";
         public static final String SIGN_UP = "/users/signup";
         public static final String H2_CONSOLE = "/h2-console";
         public static final String MY_SHORT_LINKS = "/short-links";
@@ -37,5 +38,8 @@ public class ApplicationConstants {
     public class ExceptionMessage {
         public static final String UNAUTHENTICATED = "The resource you're trying to reach requires authentication. Please authenticate and try again.";
         public static final String UNAUTHORIZED = "You do not have the necessary permissions to access this resource.";
+        public static final String BAD_CREDENTIALS = "Invalid credentials.";
+        public static final String JWT_EXPIRED = "Token has expired.";
+        public static final String JWT_VERIFICATION_FAILED = "Token verification failed.";
     }
 }

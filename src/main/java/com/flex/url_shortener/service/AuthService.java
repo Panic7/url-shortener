@@ -1,9 +1,9 @@
 package com.flex.url_shortener.service;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.flex.url_shortener.common.ApplicationConstants.CookiePaths;
 import com.flex.url_shortener.dto.AuthRequest;
 import com.flex.url_shortener.dto.AuthResponse;
+import com.flex.url_shortener.dto.UserResponse;
 import com.flex.url_shortener.entity.RefreshToken;
 import com.flex.url_shortener.mapper.UserMapper;
 import com.flex.url_shortener.security.UserDetailsImpl;
@@ -23,16 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    @Value("${security.jwt.access-cookie-name}")
+    @Value("${security.jwt.access-token.cookie.name}")
     private String accessTokenCookieName;
 
-    @Value("${security.jwt.refresh-cookie-name}")
+    @Value("${security.jwt.refresh-token.cookie.name}")
     private String refreshTokenCookieName;
 
-    @Value("#{${security.jwt.access-validity} / 1000}")
+    @Value("${security.jwt.access-token.cookie.validity}")
     private long accessTokenCookieLifetime;
 
-    @Value("#{${security.jwt.refresh-validity} / 1000}")
+    @Value("${security.jwt.refresh-token.cookie.validity}")
     private long refreshTokenCookieLifetime;
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -59,12 +59,8 @@ public class AuthService {
     }
 
     public AuthResponse tokenRefresh(String refreshToken) {
+        jwtService.validateRefreshToken(refreshToken);
         var user = userDetailsService.loadUserByUsername(jwtService.extractSubject(refreshToken));
-
-        if (!jwtService.validateRefreshToken(refreshToken, user.getEmail())) {
-            throw new JWTVerificationException("RefreshToken is invalid or expired");
-        }
-
         var accessToken = jwtService.createAccessToken(user.getEmail(), user.getRoles());
         var newRefreshToken = refreshTokenService.rotate(user.getEmail());
 
@@ -78,7 +74,6 @@ public class AuthService {
     public AuthResponse logout() {
         var accessTokenCookie = cookieService.deleteCookie(accessTokenCookieName, CookiePaths.ACCESS_TOKEN);
         var refreshTokenCookie = cookieService.deleteCookie(refreshTokenCookieName, CookiePaths.REFRESH_TOKEN);
-        refreshTokenService.revoke(getUserDetails(true).getEmail());
 
         return AuthResponse.builder()
                 .cookieAccessToken(accessTokenCookie)
@@ -97,6 +92,11 @@ public class AuthService {
         }
 
         return authUser;
+    }
+
+    public UserResponse getCurrentUser() {
+        var userDetails = getUserDetails(false);
+        return userMapper.toResponse(userDetails);
     }
 
     /**

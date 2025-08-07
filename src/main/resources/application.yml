@@ -38,8 +38,14 @@ app:
 
 security:
   jwt:
-    access-validity: 120000
-    refresh-validity: 86400000 # 24 hours (in ms)
-    access-cookie-name: 792F423F4528482B
-    refresh-cookie-name: 566B597033733676
+    access-token:
+      validity: 900000 # 15 minutes (in ms)
+      cookie:
+        name: 792F423F4528482B
+        validity: 604800 # 7 days (in seconds)
+    refresh-token:
+      validity: 604800000 # 7 days (in ms)
+      cookie:
+        name: 566B597033733676
+        validity: 604800 # 7 days (in seconds)
     secret: 2F423F4528482B4D6251655468566D597133743677397A24432646294A404E6
