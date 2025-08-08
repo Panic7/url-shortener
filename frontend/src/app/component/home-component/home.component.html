@@ -1,0 +1,95 @@
+<div class="container">
+  <h1 class="text-center">Shorten your links</h1>
+
+  <div class="url-form-container">
+    <form [formGroup]="urlForm" (ngSubmit)="shortenUrl()">
+      <mat-form-field appearance="outline" class="url-input-field">
+        <mat-label>Paste your long URL here</mat-label>
+        <input
+          matInput
+          type="url"
+          formControlName="url"
+          placeholder="https://example.com/very/long/url"
+        />
+        <button
+          class="url-form-submit-button"
+          type="submit"
+          matSuffix
+          mat-icon-button
+          aria-label="Search"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
+        @if (
+          urlForm.get("url")?.touched &&
+          urlForm.get("url")?.errors?.["required"]
+        ) {
+          <mat-error>URL is required</mat-error>
+        }
+      </mat-form-field>
+      @if (httpErrorMessage()) {
+        <mat-error>{{ httpErrorMessage() }}</mat-error>
+      }
+    </form>
+
+    @if (shortenedUrl()) {
+      <mat-card class="result-card">
+        <mat-card-content>
+          <div class="url-result">
+            <span class="shortened-url">{{ shortenedUrl() }}</span>
+            <div>
+              <button
+                mat-icon-button
+                (click)="copyToClipboard()"
+                matTooltip="Copy to clipboard"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <a
+                mat-icon-button
+                [href]="shortenedUrl()"
+                target="_blank"
+                matTooltip="Open shortened URL"
+              >
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <h2 class="text-center benefits-title">Why use our URL shortener?</h2>
+
+  <div class="benefits-container">
+    <mat-card class="benefit-card">
+      <mat-card-content class="benefit-card-content">
+        <mat-icon class="benefit-card-icon">link</mat-icon>
+        <h3>Easy to use</h3>
+        <p>
+          Shorten long URLs quickly and easily with our user-friendly interface.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="benefit-card">
+      <mat-card-content class="benefit-card-content">
+        <mat-icon class="benefit-card-icon">bar_chart</mat-icon>
+        <h3>Track your links</h3>
+        <p>
+          Monitor the performance of your shortened links with detailed
+          analytics.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="benefit-card">
+      <mat-card-content class="benefit-card-content">
+        <mat-icon class="benefit-card-icon">security</mat-icon>
+        <h3>Secure and reliable</h3>
+        <p>Our service ensures the security and reliability of your links.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
